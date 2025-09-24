@@ -96,14 +96,14 @@ class Peplink:
 				print(f"")
 				print(f"WANs Summary:")
 				for wan in self.WANS:
-						print(f"ID: {dict.get(wan, 'id') if dict.get(wan, 'id') else "N/A"}")
+						print(f"ID: {dict.get(wan, 'id') if dict.get(wan, 'id') else 'N/A'}")
 						print(
-								f"Name: {dict.get(wan, 'name') if dict.get(wan, 'name') else "N/A"}")
+								f"Name: {dict.get(wan, 'name') if dict.get(wan, 'name') else 'N/A'}")
 						print(
-								f"IP Address: {dict.get(wan, 'ip') if dict.get(wan, 'ip') else "N/A"}")
-						print(f"Enabled: {"YES" if dict.get(wan, 'enable') else "NO"}")
+								f"IP Address: {dict.get(wan, 'ip') if dict.get(wan, 'ip') else 'N/A'}")
+						print(f"Enabled: {'YES' if dict.get(wan, 'enable') else 'NO'}")
 						print(
-								f"Status: {dict.get(wan, 'message') if dict.get(wan, 'message') else "N/A"}")
+								f"Status: {dict.get(wan, 'message') if dict.get(wan, 'message') else 'N/A'}")
 						print(f"")
 
 		def get_wan_by_id(self, wan_id):
@@ -150,6 +150,12 @@ class Peplink:
 								print(f"")
 								print(
 										f"[ERROR] There's an error while switching {wan['name']} WAN status: {str(e)}")
+						
+						try:
+								self.send_webhook("WAN Disabled", f"{wan['name']} is disabled due to internet connectivity issue. The expected status should be 'Connected' but it is currently '{wan['message']}'.")
+						except Exception as e:
+								print(f"")
+								print(f"[ERROR] There's an error while sending webhook: {str(e)}")
 
 		def send_webhook(self, type, message):
 				payload = {
@@ -188,7 +194,6 @@ def main():
 		if len(disconnected_wans) > 0:
 				for wan in disconnected_wans:
 						peplink.switch_wan_status_by_id(wan['id'], "disable")
-						peplink.send_webhook("WAN Disabled", f"{wan['name']} is disabled due to internet connectivity issue. The expected status should be 'Connected' but it is currently '{wan['message']}'.")
 		else:
 				print(f"")
 				print(f"[INFO] All WANs are connected")
